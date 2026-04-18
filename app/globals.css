@@ -1,0 +1,194 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --bg: #05070a;
+  --bg-soft: #0b0f14;
+  --panel: rgba(12, 16, 22, 0.78);
+  --panel-solid: #0d1117;
+  --panel-2: #11161d;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(120, 170, 255, 0.18);
+  --text: #e8edf5;
+  --text-soft: #9aa6b2;
+  --blue: #1f4f8f;
+  --blue-glow: rgba(31, 79, 143, 0.35);
+  --red: #ff4d5a;
+  --red-glow: rgba(255, 77, 90, 0.28);
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  --radius: 20px;
+  --concrete:
+    linear-gradient(rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.015)),
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.025), transparent 28%),
+    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.02), transparent 35%);
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--panel);
+  --card-foreground: var(--text);
+  --popover: var(--panel-solid);
+  --popover-foreground: var(--text);
+  --primary: var(--blue);
+  --primary-foreground: #06111d;
+  --secondary: var(--panel-2);
+  --secondary-foreground: var(--text);
+  --muted: rgba(255, 255, 255, 0.035);
+  --muted-foreground: var(--text-soft);
+  --accent: rgba(31, 79, 143, 0.12);
+  --accent-foreground: var(--text);
+  --destructive: var(--red);
+  --destructive-foreground: #fff1f3;
+  --input: rgba(255, 255, 255, 0.03);
+  --ring: rgba(31, 79, 143, 0.28);
+  --chart-1: #60aaff;
+  --chart-2: #3f6fae;
+  --chart-3: #ff4d5a;
+  --chart-4: #7fd0b3;
+  --chart-5: #c7d2fe;
+  --sidebar: rgba(8, 11, 15, 0.92);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--blue);
+  --sidebar-primary-foreground: #06111d;
+  --sidebar-accent: rgba(31, 79, 143, 0.12);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(31, 79, 143, 0.28);
+  --wayne-gold: var(--blue);
+  --wayne-dark: var(--bg);
+  --wayne-success: #7fd0b3;
+  --wayne-warning: #ffd166;
+  --wayne-info: #7cc4ff;
+}
+
+.dark {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--panel);
+  --card-foreground: var(--text);
+  --popover: var(--panel-solid);
+  --popover-foreground: var(--text);
+  --primary: var(--blue);
+  --primary-foreground: #06111d;
+  --secondary: var(--panel-2);
+  --secondary-foreground: var(--text);
+  --muted: rgba(255, 255, 255, 0.035);
+  --muted-foreground: var(--text-soft);
+  --accent: rgba(31, 79, 143, 0.12);
+  --accent-foreground: var(--text);
+  --destructive: var(--red);
+  --destructive-foreground: #fff1f3;
+  --input: rgba(255, 255, 255, 0.03);
+  --ring: rgba(31, 79, 143, 0.28);
+  --chart-1: #60aaff;
+  --chart-2: #3f6fae;
+  --chart-3: #ff4d5a;
+  --chart-4: #7fd0b3;
+  --chart-5: #c7d2fe;
+  --sidebar: rgba(8, 11, 15, 0.92);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--blue);
+  --sidebar-primary-foreground: #06111d;
+  --sidebar-accent: rgba(31, 79, 143, 0.12);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(31, 79, 143, 0.28);
+}
+
+@theme inline {
+  --font-sans: 'Space Grotesk', 'Inter', 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  /* Wayne Industries custom colors */
+  --color-wayne-gold: var(--wayne-gold);
+  --color-wayne-dark: var(--wayne-dark);
+  --color-wayne-success: var(--wayne-success);
+  --color-wayne-warning: var(--wayne-warning);
+  --color-wayne-info: var(--wayne-info);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    min-height: 100%;
+    @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at top center, rgba(77, 163, 255, 0.08), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(255, 77, 90, 0.06), transparent 30%),
+      linear-gradient(180deg, #030508 0%, #070b10 100%);
+    color: var(--text);
+    font-family: var(--font-space-grotesk), 'Space Grotesk', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.01em;
+  }
+  body {
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      var(--concrete),
+      linear-gradient(rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.01));
+    opacity: 0.55;
+    mix-blend-mode: soft-light;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  img {
+    max-width: 100%;
+    display: block;
+  }
+}

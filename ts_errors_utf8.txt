@@ -1,0 +1,3 @@
+﻿components/equipment/equipment-form.tsx(176,72): error TS2322: Type 'string' is not assignable to type 'ResourceStatus'.
+components/vehicles/vehicles-table.tsx(32,37): error TS2307: Cannot find module './delete-vehicle-dialog' or its corresponding type declarations.
+components/vehicles/vehicles-table.tsx(225,24): error TS7006: Parameter 'open' implicitly has an 'any' type.
