@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -21,8 +21,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { UserCog, Loader2, ShieldAlert } from 'lucide-react'
-import type { Profile, UserRole } from '@/lib/types/database'
+import type { Profile, UserRole, Department } from '@/lib/types/database'
 import { updateUserAction } from '@/app/dashboard/users/actions'
+import { createClient } from '@/lib/supabase/client'
 
 interface EditUserDialogProps {
   user: Profile
@@ -34,12 +35,20 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [departments, setDepartments] = useState<Department[]>([])
 
   const [formData, setFormData] = useState({
     full_name: user.full_name,
     role: user.role as UserRole,
     department: user.department || '',
   })
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('departments').select('id, name').order('name').then(({ data }) => {
+      if (data) setDepartments(data as Department[])
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -106,13 +115,19 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 
               <div className="space-y-1.5">
                 <Label htmlFor="edit-department">Departamento</Label>
-                <Input
-                  id="edit-department"
-                  placeholder="Ex: Segurança"
+                <Select
                   value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="bg-input border-border"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, department: value })}
+                >
+                  <SelectTrigger id="edit-department" className="bg-input border-border">
+                    <SelectValue placeholder="Selecionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

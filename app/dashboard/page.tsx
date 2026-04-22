@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DashboardStats } from '@/components/dashboard/stats'
 import { DashboardCharts } from '@/components/dashboard/charts'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
+import type { DrawerItem } from '@/components/dashboard/items-drawer'
 
 export const metadata = {
   title: 'Dashboard',
@@ -10,32 +11,22 @@ export const metadata = {
 async function getDashboardData() {
   const supabase = await createClient()
 
-  // Fetch equipment counts
-  const { data: equipment } = await supabase
-    .from('equipment')
-    .select('status')
+  const [
+    { data: equipment },
+    { data: vehicles },
+    { data: securityDevices },
+    { data: recentActivity },
+  ] = await Promise.all([
+    supabase.from('equipment').select('id, name, description, status, image_url'),
+    supabase.from('vehicles').select('id, name, description, status, image_url'),
+    supabase.from('security_devices').select('id, name, description, status, image_url'),
+    supabase
+      .from('activity_logs')
+      .select('*, user:profiles(full_name, avatar_url)')
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ])
 
-  // Fetch vehicles counts
-  const { data: vehicles } = await supabase
-    .from('vehicles')
-    .select('status')
-
-  // Fetch security devices counts
-  const { data: securityDevices } = await supabase
-    .from('security_devices')
-    .select('status')
-
-  // Fetch recent activity
-  const { data: recentActivity } = await supabase
-    .from('activity_logs')
-    .select(`
-      *,
-      user:profiles(full_name, avatar_url)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  // Calculate stats
   const equipmentByStatus = {
     available: equipment?.filter(e => e.status === 'available').length || 0,
     in_use: equipment?.filter(e => e.status === 'in_use').length || 0,
@@ -56,6 +47,12 @@ async function getDashboardData() {
     maintenance: securityDevices?.filter(d => d.status === 'maintenance').length || 0,
   }
 
+  const allItems: DrawerItem[] = [
+    ...(equipment ?? []).map(e => ({ ...e, type: 'equipment' as const })),
+    ...(vehicles ?? []).map(v => ({ ...v, type: 'vehicle' as const })),
+    ...(securityDevices ?? []).map(d => ({ ...d, type: 'security_device' as const })),
+  ]
+
   return {
     totalEquipment: equipment?.length || 0,
     totalVehicles: vehicles?.length || 0,
@@ -64,6 +61,7 @@ async function getDashboardData() {
     vehiclesByStatus,
     devicesByStatus,
     recentActivity: recentActivity || [],
+    allItems,
   }
 }
 
@@ -86,6 +84,7 @@ export default async function DashboardPage() {
         equipmentByStatus={data.equipmentByStatus}
         vehiclesByStatus={data.vehiclesByStatus}
         devicesByStatus={data.devicesByStatus}
+        allItems={data.allItems}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

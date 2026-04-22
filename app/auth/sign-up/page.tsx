@@ -20,17 +20,9 @@ import {
 } from '@/components/ui/select'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2, UserPlus } from 'lucide-react'
-
-const DEPARTMENTS = [
-  'Pesquisa e Desenvolvimento',
-  'Seguranca',
-  'Tecnologia',
-  'Operacoes',
-  'Administracao',
-  'Recursos Humanos',
-]
+import type { Department } from '@/lib/types/database'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -38,9 +30,17 @@ export default function SignUpPage() {
   const [repeatPassword, setRepeatPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [department, setDepartment] = useState('')
+  const [departments, setDepartments] = useState<Department[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from('departments').select('id, name').order('name').then(({ data }) => {
+      if (data) setDepartments(data as Department[])
+    })
+  }, [])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,7 +71,7 @@ export default function SignUpPage() {
           data: {
             full_name: fullName,
             department: department,
-            role: 'employee', // Default role for new users
+            role: 'employee',
           },
         },
       })
@@ -125,10 +125,8 @@ export default function SignUpPage() {
                 <SelectValue placeholder="Selecione seu departamento" />
               </SelectTrigger>
               <SelectContent>
-                {DEPARTMENTS.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
+                {departments.map((d) => (
+                  <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -57,9 +57,27 @@ export const securityDeviceSchema = z.object({
   image_url: z.string().max(500, 'URL da imagem muito longa').optional(),
 })
 
+export const departmentSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome muito longo'),
+  description: z.string().max(500, 'Descrição muito longa').optional(),
+})
+
+export const locationSchema = z.object({
+  department_id: z.string().uuid('Departamento inválido'),
+  name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome muito longo'),
+})
+
+export const sectorSchema = z.object({
+  location_id: z.string().uuid('Local inválido'),
+  name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome muito longo'),
+})
+
 export type EquipmentFormData = z.infer<typeof equipmentSchema>
 export type VehicleFormData = z.infer<typeof vehicleSchema>
 export type SecurityDeviceFormData = z.infer<typeof securityDeviceSchema>
+export type DepartmentFormData = z.infer<typeof departmentSchema>
+export type LocationFormData = z.infer<typeof locationSchema>
+export type SectorFormData = z.infer<typeof sectorSchema>
 
 export function extractFieldErrors(error: z.ZodError): Record<string, string> {
   const fieldErrors: Record<string, string> = {}

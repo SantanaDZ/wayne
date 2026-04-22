@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { SplashScreen } from '@/components/splash-screen'
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
+      <SplashScreen />
       <DashboardSidebar user={user} profile={profile} />
       <SidebarInset className="relative bg-background/95">
         <div 

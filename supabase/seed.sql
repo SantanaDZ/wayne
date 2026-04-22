@@ -146,3 +146,52 @@ INSERT INTO public.security_devices (name, description, type, status, serial_num
 ('Sensor Sismológico', 'Detecta perfurações não autorizadas', 'sensor', 'active', 'SENS-SM-104', 'Perímetro Subterrâneo', '192.168.1.105'),
 ('Scanner de Retina Wayne', 'Controle Biométrico', 'biometric', 'active', 'BIO-RET-11', 'Portão D', '192.168.1.111'),
 ('Torreta Autônoma No-Lethal', 'Defesa perimetral não armada letal', 'alarm', 'maintenance', 'TUR-NL-01', 'Setor Leste', '192.168.1.200');
+
+
+-- ============================================================
+-- 7. Sistema de Departamentos Hierárquicos
+-- ============================================================
+
+-- Departamentos
+CREATE TABLE IF NOT EXISTS public.departments (
+    id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name        TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Locais (1..N por departamento)
+CREATE TABLE IF NOT EXISTS public.department_locations (
+    id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    department_id UUID NOT NULL REFERENCES public.departments(id) ON DELETE CASCADE,
+    name          TEXT NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Setores (1..N por local)
+CREATE TABLE IF NOT EXISTS public.department_sectors (
+    id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    location_id UUID NOT NULL REFERENCES public.department_locations(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Coluna de referência no perfil do usuário
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL;
+
+-- RLS
+ALTER TABLE public.departments          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.department_locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.department_sectors   ENABLE ROW LEVEL SECURITY;
+
+-- Qualquer autenticado pode ler
+CREATE POLICY "dept_select"     ON public.departments          FOR SELECT TO authenticated USING (true);
+CREATE POLICY "loc_select"      ON public.department_locations FOR SELECT TO authenticated USING (true);
+CREATE POLICY "sector_select"   ON public.department_sectors   FOR SELECT TO authenticated USING (true);
+
+-- Apenas admins podem escrever
+CREATE POLICY "dept_write"      ON public.departments          FOR ALL    TO authenticated USING (public.get_current_user_role() = 'admin') WITH CHECK (public.get_current_user_role() = 'admin');
+CREATE POLICY "loc_write"       ON public.department_locations FOR ALL    TO authenticated USING (public.get_current_user_role() = 'admin') WITH CHECK (public.get_current_user_role() = 'admin');
+CREATE POLICY "sector_write"    ON public.department_sectors   FOR ALL    TO authenticated USING (public.get_current_user_role() = 'admin') WITH CHECK (public.get_current_user_role() = 'admin');

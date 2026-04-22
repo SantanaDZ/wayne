@@ -27,6 +27,7 @@ import {
   Activity,
   Settings,
   LogOut,
+  Building2,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
@@ -78,6 +79,14 @@ const adminNavItems = [
     title: 'Logs de Atividade',
     href: '/dashboard/activity-logs',
     icon: Activity,
+  },
+]
+
+const adminOnlyNavItems = [
+  {
+    title: 'Departamentos',
+    href: '/dashboard/departments',
+    icon: Building2,
   },
 ]
 
@@ -166,6 +175,20 @@ export function DashboardSidebar({ user, profile }: DashboardSidebarProps) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminNavItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.href)}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                {isAdmin && adminOnlyNavItems.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
