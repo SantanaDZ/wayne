@@ -291,6 +291,7 @@ export function UsersTable({ users, currentUserId, canManage, isAdmin }: UsersTa
           user={editingUser}
           open={!!editingUser}
           onOpenChange={(open) => !open && setEditingUser(null)}
+          callerRole={isAdmin ? 'admin' : 'manager'}
         />
       )}
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import type { Equipment, Profile, ResourceStatus } from '@/lib/types/database'
+import type { Equipment, Profile, ResourceStatus, Location } from '@/lib/types/database'
+import { ImagePicker } from '@/components/ui/image-picker'
 import { equipmentSchema, extractFieldErrors } from '@/lib/validations'
 import { logActivity } from '@/lib/log-activity'
 
@@ -53,16 +54,23 @@ export function EquipmentForm({ equipment, profiles, userId }: EquipmentFormProp
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [locations, setLocations] = useState<Location[]>([])
   const [formData, setFormData] = useState({
     name: equipment?.name || '',
     description: equipment?.description || '',
     category: equipment?.category || 'tech',
     status: equipment?.status || 'available',
     serial_number: equipment?.serial_number || '',
-    location: equipment?.location || '',
+    location_id: (equipment as any)?.location_id || '',
     assigned_to: equipment?.assigned_to || UNASSIGNED_VALUE,
     image_url: equipment?.image_url || '',
   })
+
+  useEffect(() => {
+    supabase.from('locations').select('id, name').order('name').then(({ data }) => {
+      if (data) setLocations(data as Location[])
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -82,7 +90,7 @@ export function EquipmentForm({ equipment, profiles, userId }: EquipmentFormProp
         category: formData.category,
         status: formData.status as ResourceStatus,
         serial_number: formData.serial_number || null,
-        location: formData.location || null,
+        location_id: formData.location_id || null,
         assigned_to: formData.assigned_to === UNASSIGNED_VALUE ? null : formData.assigned_to,
         image_url: formData.image_url || null,
         ...(isEditing ? {} : { created_by: userId }),
@@ -211,26 +219,29 @@ export function EquipmentForm({ equipment, profiles, userId }: EquipmentFormProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Localizacao</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Ex: Torre Wayne - Andar 15"
-                />
-                {fieldErrors.location && <p className="text-sm text-destructive">{fieldErrors.location}</p>}
+                <Label htmlFor="location_id">Local</Label>
+                <Select
+                  value={formData.location_id}
+                  onValueChange={(v) => setFormData({ ...formData, location_id: v })}
+                >
+                  <SelectTrigger id="location_id">
+                    <SelectValue placeholder="Selecione o local" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Caminho da Imagem</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="Ex: /equipamentos/drone.png"
-                />
-                {fieldErrors.image_url && <p className="text-sm text-destructive">{fieldErrors.image_url}</p>}
-              </div>
+              <ImagePicker
+                label="Imagem"
+                value={formData.image_url}
+                onChange={(v) => setFormData({ ...formData, image_url: v })}
+                presets={[]}
+                error={fieldErrors.image_url}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_to">Atribuir a</Label>

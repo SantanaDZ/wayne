@@ -4,27 +4,11 @@ export type UserRole = 'employee' | 'manager' | 'admin'
 export type ResourceStatus = 'available' | 'in_use' | 'maintenance' | 'retired'
 export type DeviceStatus = 'active' | 'inactive' | 'maintenance'
 
-export interface Department {
+export interface Location {
   id: string
   name: string
   description: string | null
-  created_at: string
-  updated_at: string
-  locations?: DepartmentLocation[]
-}
-
-export interface DepartmentLocation {
-  id: string
-  department_id: string
-  name: string
-  created_at: string
-  sectors?: DepartmentSector[]
-}
-
-export interface DepartmentSector {
-  id: string
-  location_id: string
-  name: string
+  image_url: string | null
   created_at: string
 }
 
@@ -33,7 +17,7 @@ export interface Profile {
   full_name: string
   role: UserRole
   department: string | null
-  department_id: string | null
+  pin: string | null
   avatar_url: string | null
   created_at: string
   updated_at: string

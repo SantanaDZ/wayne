@@ -4,6 +4,7 @@ import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/header'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { SplashScreen } from '@/components/splash-screen'
+import { RouteGate } from '@/components/access-control/route-gate'
 
 export default async function DashboardLayout({
   children,
@@ -29,13 +30,15 @@ export default async function DashboardLayout({
       <SplashScreen />
       <DashboardSidebar user={user} profile={profile} />
       <SidebarInset className="relative bg-background/95">
-        <div 
+        <div
           className="absolute inset-0 z-[-1] bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
           style={{ backgroundImage: "url('/background-dashoard.png')" }}
         />
         <DashboardHeader user={user} profile={profile} />
         <main className="flex-1 p-4 md:p-6">
-          {children}
+          <RouteGate profile={profile}>
+            {children}
+          </RouteGate>
         </main>
       </SidebarInset>
     </SidebarProvider>

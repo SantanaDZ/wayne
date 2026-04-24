@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import type { Vehicle, Profile, ResourceStatus } from '@/lib/types/database'
+import type { Vehicle, Profile, ResourceStatus, Location } from '@/lib/types/database'
+import { ImagePicker } from '@/components/ui/image-picker'
 import { vehicleSchema, extractFieldErrors } from '@/lib/validations'
 import { logActivity } from '@/lib/log-activity'
 
@@ -55,18 +56,25 @@ export function VehicleForm({ vehicle, profiles, userId }: VehicleFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [locations, setLocations] = useState<Location[]>([])
   const [formData, setFormData] = useState({
     name: vehicle?.name || '',
     description: vehicle?.description || '',
     type: vehicle?.type || 'car',
     status: vehicle?.status || 'available',
-    license_plate: vehicle?.plate_number || '', // Uses plate_number from type, but maps to license_plate in DB
+    license_plate: vehicle?.plate_number || '',
     model: vehicle?.model || '',
     year: vehicle?.year || '',
-    location: vehicle?.location || '',
+    location_id: (vehicle as any)?.location_id || '',
     assigned_to: vehicle?.assigned_to || UNASSIGNED_VALUE,
     image_url: vehicle?.image_url || '',
   })
+
+  useEffect(() => {
+    supabase.from('locations').select('id, name').order('name').then(({ data }) => {
+      if (data) setLocations(data as Location[])
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -88,7 +96,7 @@ export function VehicleForm({ vehicle, profiles, userId }: VehicleFormProps) {
         plate_number: formData.license_plate || null,
         model: formData.model || null,
         year: formData.year ? parseInt(formData.year.toString()) : null,
-        location: formData.location || null,
+        location_id: formData.location_id || null,
         assigned_to: formData.assigned_to === UNASSIGNED_VALUE ? null : formData.assigned_to,
         image_url: formData.image_url || null,
         ...(isEditing ? {} : { created_by: userId }),
@@ -240,26 +248,29 @@ export function VehicleForm({ vehicle, profiles, userId }: VehicleFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Localizacao</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Ex: Batcaverna - Garagem Sul"
-                />
-                {fieldErrors.location && <p className="text-sm text-destructive">{fieldErrors.location}</p>}
+                <Label htmlFor="location_id">Local</Label>
+                <Select
+                  value={formData.location_id}
+                  onValueChange={(v) => setFormData({ ...formData, location_id: v })}
+                >
+                  <SelectTrigger id="location_id">
+                    <SelectValue placeholder="Selecione o local" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Caminho da Imagem</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="Ex: /veiculos/batmovel.png"
-                />
-                {fieldErrors.image_url && <p className="text-sm text-destructive">{fieldErrors.image_url}</p>}
-              </div>
+              <ImagePicker
+                label="Imagem"
+                value={formData.image_url}
+                onChange={(v) => setFormData({ ...formData, image_url: v })}
+                presets={['/veiculos/heli.png', '/veiculos/jato.png']}
+                error={fieldErrors.image_url}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="assigned_to">Atribuir a</Label>

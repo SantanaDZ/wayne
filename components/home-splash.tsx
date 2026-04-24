@@ -2,21 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export function SplashScreen() {
+export function HomeSplash() {
   const [visible, setVisible] = useState(false)
   const [fading, setFading] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    if (!sessionStorage.getItem('wayne-show-splash')) return
-
-    sessionStorage.removeItem('wayne-show-splash')
+    if (sessionStorage.getItem('wayne-home-splash-seen')) return
+    sessionStorage.setItem('wayne-home-splash-seen', '1')
     setVisible(true)
   }, [])
 
   useEffect(() => {
     if (!visible) return
-
     const video = videoRef.current
     if (!video) return
 

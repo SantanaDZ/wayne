@@ -17,6 +17,7 @@ interface UpdateUserInput {
   full_name: string
   role: UserRole
   department: string
+  pin?: string
 }
 
 export async function createUserAction(input: CreateUserInput) {
@@ -94,14 +95,19 @@ export async function updateUserAction(input: UpdateUserInput) {
       return { error: 'Gerentes não podem promover usuários a administrador.' }
     }
 
+    const update: Record<string, unknown> = {
+      full_name: input.full_name,
+      role: input.role,
+      department: input.department || null,
+      updated_at: new Date().toISOString(),
+    }
+    if (input.pin !== undefined) {
+      update.pin = input.pin || null
+    }
+
     const { error } = await supabase
       .from('profiles')
-      .update({
-        full_name: input.full_name,
-        role: input.role,
-        department: input.department || null,
-        updated_at: new Date().toISOString(),
-      })
+      .update(update)
       .eq('id', input.id)
 
     if (error) return { error: error.message }

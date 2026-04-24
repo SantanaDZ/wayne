@@ -10,9 +10,9 @@ export default function AuthLayout({
       {/* Background w/ Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/background-dashboard.png')" }}
+        style={{ backgroundImage: "url('/background-oficial.png')" }}
       />
-      <div className="absolute inset-0 z-0 bg-background/80 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 z-0 bg-background/50" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="flex flex-col items-center mb-8">

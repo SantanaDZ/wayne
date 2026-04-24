@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -21,34 +21,28 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { UserCog, Loader2, ShieldAlert } from 'lucide-react'
-import type { Profile, UserRole, Department } from '@/lib/types/database'
+import type { Profile, UserRole } from '@/lib/types/database'
 import { updateUserAction } from '@/app/dashboard/users/actions'
-import { createClient } from '@/lib/supabase/client'
 
 interface EditUserDialogProps {
   user: Profile
   open: boolean
   onOpenChange: (open: boolean) => void
+  callerRole?: UserRole
 }
 
-export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps) {
+export function EditUserDialog({ user, open, onOpenChange, callerRole }: EditUserDialogProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [departments, setDepartments] = useState<Department[]>([])
-
   const [formData, setFormData] = useState({
     full_name: user.full_name,
     role: user.role as UserRole,
     department: user.department || '',
+    pin: user.pin || '',
   })
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.from('departments').select('id, name').order('name').then(({ data }) => {
-      if (data) setDepartments(data as Department[])
-    })
-  }, [])
+  const isAdmin = callerRole === 'admin'
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -115,21 +109,31 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 
               <div className="space-y-1.5">
                 <Label htmlFor="edit-department">Departamento</Label>
-                <Select
+                <Input
+                  id="edit-department"
+                  placeholder="Ex: Segurança"
                   value={formData.department}
-                  onValueChange={(value) => setFormData({ ...formData, department: value })}
-                >
-                  <SelectTrigger id="edit-department" className="bg-input border-border">
-                    <SelectValue placeholder="Selecionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  className="bg-input border-border"
+                />
               </div>
             </div>
+
+            {isAdmin && (
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-pin">PIN de Acesso <span className="text-muted-foreground text-xs">(4–6 dígitos)</span></Label>
+                <Input
+                  id="edit-pin"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="Ex: 1234"
+                  value={formData.pin}
+                  onChange={(e) => setFormData({ ...formData, pin: e.target.value.replace(/\D/g, '') })}
+                  className="bg-input border-border font-mono tracking-widest"
+                />
+              </div>
+            )}
           </div>
 
           {error && (

@@ -27,7 +27,7 @@ import {
   Activity,
   Settings,
   LogOut,
-  Building2,
+  MapPin,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
@@ -62,6 +62,11 @@ const resourceNavItems = [
     href: '/dashboard/security-devices',
     icon: Shield,
   },
+  {
+    title: 'Locais',
+    href: '/dashboard/locations',
+    icon: MapPin,
+  },
 ]
 
 const adminNavItems = [
@@ -82,13 +87,7 @@ const adminNavItems = [
   },
 ]
 
-const adminOnlyNavItems = [
-  {
-    title: 'Departamentos',
-    href: '/dashboard/departments',
-    icon: Building2,
-  },
-]
+const adminOnlyNavItems: { title: string; href: string; icon: React.ElementType }[] = []
 
 export function DashboardSidebar({ user, profile }: DashboardSidebarProps) {
   const pathname = usePathname()

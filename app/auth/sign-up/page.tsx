@@ -20,9 +20,8 @@ import {
 } from '@/components/ui/select'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Loader2, UserPlus } from 'lucide-react'
-import type { Department } from '@/lib/types/database'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -30,17 +29,9 @@ export default function SignUpPage() {
   const [repeatPassword, setRepeatPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [department, setDepartment] = useState('')
-  const [departments, setDepartments] = useState<Department[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.from('departments').select('id, name').order('name').then(({ data }) => {
-      if (data) setDepartments(data as Department[])
-    })
-  }, [])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,16 +111,13 @@ export default function SignUpPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="department">Departamento</Label>
-            <Select value={department} onValueChange={setDepartment} required>
-              <SelectTrigger className="bg-input/50">
-                <SelectValue placeholder="Selecione seu departamento" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((d) => (
-                  <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="department"
+              placeholder="Ex: Segurança"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              className="bg-input/50"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>

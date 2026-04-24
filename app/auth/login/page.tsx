@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Loader2, LogIn } from 'lucide-react'
+import { Loader2, LogIn, ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -44,6 +44,9 @@ export default function LoginPage() {
   return (
     <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
       <CardHeader className="space-y-1">
+        <Link href="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1">
+          <ArrowLeft className="h-3 w-3" /> Página inicial
+        </Link>
         <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
         <CardDescription className="text-center">
           Insira suas credenciais para acessar o sistema
