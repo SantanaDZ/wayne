@@ -28,6 +28,7 @@ import {
   Settings,
   LogOut,
   MapPin,
+  UserCircle,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
@@ -43,6 +44,11 @@ const mainNavItems = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'Meu Perfil',
+    href: '/dashboard/profile',
+    icon: UserCircle,
   },
 ]
 
