@@ -11,26 +11,21 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Loader2, UserPlus } from 'lucide-react'
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [department, setDepartment] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [fullName, setFullName]         = useState('')
+  const [department, setDepartment]     = useState('')
+  const [pin, setPin]                   = useState('')
+  const [confirmPin, setConfirmPin]     = useState('')
+  const [error, setError]               = useState<string | null>(null)
+  const [isLoading, setIsLoading]       = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -40,36 +35,52 @@ export default function SignUpPage() {
     setError(null)
 
     if (password !== repeatPassword) {
-      setError('As senhas nao coincidem')
+      setError('As senhas não coincidem')
       setIsLoading(false)
       return
     }
-
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres')
       setIsLoading(false)
       return
     }
+    if (pin.length < 4) {
+      setError('O PIN deve ter pelo menos 4 dígitos')
+      setIsLoading(false)
+      return
+    }
+    if (pin !== confirmPin) {
+      setError('Os PINs não coincidem')
+      setIsLoading(false)
+      return
+    }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-            `${window.location.origin}/dashboard`,
           data: {
             full_name: fullName,
-            department: department,
+            department,
             role: 'employee',
           },
         },
       })
-      if (error) throw error
-      router.push('/auth/sign-up-success')
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Ocorreu um erro ao criar conta')
+      if (signUpError) throw signUpError
+
+      // Salva o PIN no perfil assim que o usuário é criado
+      if (data.user) {
+        await supabase
+          .from('profiles')
+          .update({ pin })
+          .eq('id', data.user.id)
+      }
+
+      sessionStorage.setItem('wayne-show-splash', '1')
+      router.push('/dashboard')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao criar conta')
     } finally {
       setIsLoading(false)
     }
@@ -97,6 +108,7 @@ export default function SignUpPage() {
               className="bg-input/50"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -109,6 +121,7 @@ export default function SignUpPage() {
               className="bg-input/50"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="department">Departamento</Label>
             <Input
@@ -119,6 +132,7 @@ export default function SignUpPage() {
               className="bg-input/50"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <Input
@@ -130,6 +144,7 @@ export default function SignUpPage() {
               className="bg-input/50"
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="repeatPassword">Confirmar Senha</Label>
             <Input
@@ -141,11 +156,49 @@ export default function SignUpPage() {
               className="bg-input/50"
             />
           </div>
+
+          <div className="border-t border-border/40 pt-4 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              O PIN será usado nas verificações de segurança do sistema.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="pin">PIN de Acesso</Label>
+                <Input
+                  id="pin"
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="4–6 dígitos"
+                  required
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                  className="bg-input/50 font-mono tracking-widest text-center"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPin">Confirmar PIN</Label>
+                <Input
+                  id="confirmPin"
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="4–6 dígitos"
+                  required
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                  className="bg-input/50 font-mono tracking-widest text-center"
+                />
+              </div>
+            </div>
+          </div>
+
           {error && (
             <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
@@ -159,12 +212,10 @@ export default function SignUpPage() {
               </>
             )}
           </Button>
+
           <div className="text-center text-sm text-muted-foreground">
-            Ja tem uma conta?{' '}
-            <Link
-              href="/auth/login"
-              className="text-primary hover:underline underline-offset-4 font-medium"
-            >
+            Já tem uma conta?{' '}
+            <Link href="/auth/login" className="text-primary hover:underline underline-offset-4 font-medium">
               Entrar
             </Link>
           </div>
