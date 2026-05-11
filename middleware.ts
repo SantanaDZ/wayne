@@ -1,20 +1,31 @@
-import { updateSession } from '@/lib/supabase/middleware'
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+// Check for Supabase auth cookie without making any network call.
+// The cookie name follows the pattern: sb-<project-ref>-auth-token (may be chunked as .0, .1, …)
+// Token validation and session refresh happen in Server Components via getUser().
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(
+    ({ name }) => name.startsWith('sb-') && name.includes('-auth-token'),
+  )
+}
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  const isProtected =
+    pathname.startsWith('/dashboard') || pathname.startsWith('/protected')
+
+  if (isProtected && !hasAuthCookie(request)) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  return NextResponse.next({ request })
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
