@@ -31,28 +31,24 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: If you remove getUser() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
+  // Use getSession() here to avoid a network round-trip to Supabase Auth on
+  // every request — Edge Middleware has a short wall-clock timeout on Vercel
+  // and getUser() (which re-validates remotely) causes MIDDLEWARE_INVOCATION_TIMEOUT.
+  // Actual token verification is done in Server Components/layouts via getUser().
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !session) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)
   }
 
   if (
-    // if the user is not logged in and the app path, in this case, /protected, is accessed, redirect to the login page
     request.nextUrl.pathname.startsWith('/protected') &&
-    !user
+    !session
   ) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)
